@@ -44,35 +44,58 @@ public class Simulation {
 	public int countAliveNeighbors(int x, int y) {
 		int count = 0;
 		
-		count += this.board[x - 1][y - 1];
-		count += this.board[x][y - 1];
-		count += this.board[x + 1][y - 1];
+		count += getState(x - 1, y - 1);
+		count += getState(x, y - 1);
+		count += getState(x + 1, y - 1);
 		
-		count += this.board[x - 1][y];
-		count += this.board[x + 1][y];
+		count += getState(x - 1, y);
+		count += getState(x + 1, y);
 		
-		count += this.board[x - 1][y + 1];
-		count += this.board[x][y - 1];
-		count += this.board[x + 1][y + 1];
+		count += getState(x - 1, y + 1);
+		count += getState(x, y + 1);
+		count += getState(x + 1, y + 1);
 		
 		return count;
 	}
 	
+	public int getState(int x, int y) {
+		if (x < 0 || x >= width) {
+			return 0;
+		}
+		
+		if (y < 0 || y >= height) {
+			return 0;
+		}
+		
+		return this.board[x][y];
+	}
+	
+	// Simulates a "step" in the game by looping through the x and y coordinates
+	// and changing the board state as it goes.
 	public void step() {
+		int[][] newBoard = new int[width][height];
+		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int aliveNeighbors = countAliveNeighbors(x, y);
 				
-				if (this.board[x][y] == 1) {
+				if (getState(x, y) == 1) {
 					if (aliveNeighbors < 2) {
-						this.board[x][y] = 0;
+						newBoard[x][y] = 0;
+					} else if (aliveNeighbors == 2 || aliveNeighbors == 3) {
+						newBoard[x][y] = 1;
+					} else if (aliveNeighbors > 3) {
+						newBoard[x][y] = 0;
 					}
 				} else {
-					
-				}
-				
+					if (aliveNeighbors == 3) {
+						newBoard[x][y] = 1;
+					}
+				}	
 			}
 		}
+		
+		this.board = newBoard;
 	}
 	
 	public static void main(String[] args) {
@@ -84,6 +107,10 @@ public class Simulation {
 		
 		simulation.printBoard();
 		
-		System.out.println(simulation.countAliveNeighbors(3, 2));
+		simulation.step();
+		simulation.printBoard();
+		
+		simulation.step();
+		simulation.printBoard();
 	}
 }
