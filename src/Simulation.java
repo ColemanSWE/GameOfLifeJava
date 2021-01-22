@@ -1,122 +1,34 @@
+import model.Board;
+import model.CellState;
+import model.SimulationRule;
 
 public class Simulation {
 	
-	int width; 
-	int height;
-	int [] [] board;
+	private Board simulationBoard;
+	private SimulationRule simulationRule;
 	
 	// Constructor for Simulation class that creates a board
-	public Simulation(int width, int height) {
-		this.width = width;
-		this.height = height;
-		this.board = new int[width][height];
-	}
-	
-	// Prints board with the given height and width using nested for loops.
-	public void printBoard() {
-		System.out.println("---");
-		for (int y = 0; y < height; y++) {
-			String line = "|";
-			for (int x = 0; x < width; x++) {
-				if (this.board[x][y] == 0) {
-					line += ".";
-				} else {
-					line += "*";
-				}
-			}
-			line += "|";
-			System.out.println(line);
-		}
-		System.out.println("---\n");
-	}
-	
-	// set the alive spaces in the initial state using coordinates.
-	public void setAlive(int x, int y) {
-		this.board[x][y] = 1;
-	}
-	
-	// same except for dead spaces
-	public void setDead(int x, int y) {
-		this.board[x][y] = 0;
-	}
-	
-	// Counts the amount of squares around the current square that are alive. 
-	public int countAliveNeighbors(int x, int y) {
-		int count = 0;
-		
-		count += getState(x - 1, y - 1);
-		count += getState(x, y - 1);
-		count += getState(x + 1, y - 1);
-		
-		count += getState(x - 1, y);
-		count += getState(x + 1, y);
-		
-		count += getState(x - 1, y + 1);
-		count += getState(x, y + 1);
-		count += getState(x + 1, y + 1);
-		
-		return count;
-	}
-	
-	public int getState(int x, int y) {
-		if (x < 0 || x >= width) {
-			return 0;
-		}
-		
-		if (y < 0 || y >= height) {
-			return 0;
-		}
-		
-		return this.board[x][y];
+	public Simulation(Board simulationBoard, SimulationRule simulationRule) {
+		this.simulationBoard = simulationBoard;
+		this.simulationRule = simulationRule;
 	}
 	
 	// Simulates a "step" in the game by looping through the x and y coordinates
 	// and changing the board state as it goes.
 	public void step() {
-		int[][] newBoard = new int[width][height];
+		Board nextState = simulationBoard.copy();
 		
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int aliveNeighbors = countAliveNeighbors(x, y);
-				
-				if (getState(x, y) == 1) {
-					if (aliveNeighbors < 2) {
-						newBoard[x][y] = 0;
-					} else if (aliveNeighbors == 2 || aliveNeighbors == 3) {
-						newBoard[x][y] = 1;
-					} else if (aliveNeighbors > 3) {
-						newBoard[x][y] = 0;
-					}
-				} else {
-					if (aliveNeighbors == 3) {
-						newBoard[x][y] = 1;
-					}
-				}	
+		for (int y = 0; y < simulationBoard.getHeight(); y++) {
+			for (int x = 0; x < simulationBoard.getWidth(); x++) {
+				CellState newState = simulationRule.getNextState(x, y, simulationBoard);
+				nextState.setState(x, y, newState);
 			}
 		}
 		
-		this.board = newBoard;
+		this.simulationBoard = nextState;
 	}
 	
-	public static void main(String[] args) {
-		Simulation simulation = new Simulation(10, 10);
-		
-		simulation.setAlive(2, 2);
-		simulation.setAlive(3, 2);
-		simulation.setAlive(4, 2);
-		
-		simulation.printBoard();
-		
-		simulation.step();
-		simulation.printBoard();
-		
-		simulation.step();
-		simulation.printBoard();
-		
-		simulation.step();
-		simulation.printBoard();
-		
-		simulation.step();
-		simulation.printBoard();
+	public Board getBoard() {
+		return simulationBoard;
 	}
 }
