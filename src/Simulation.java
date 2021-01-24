@@ -43,7 +43,7 @@ public class Simulation {
 		if (simulationBoard.getState(x, y) == CellState.ALIVE) {
 			return "*";
 		} else {
-			return ".";
+			return ":";
 		}
 	}
 	
